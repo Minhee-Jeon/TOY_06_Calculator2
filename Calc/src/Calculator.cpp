@@ -5,6 +5,7 @@
 bool isEqual(char);
 bool isOperator(char);
 bool isNumber(char);
+char intToChar(int);
 int powerOfTen(int);
 
 //input 계산기
@@ -13,13 +14,17 @@ void Calculator::calculate(char* input) {
 
 }
 
-Number* Calculator::charToNum(char* ch) {
+Number Calculator::charToNum(char* ch) {
     int value = 0, pointCnt = 0;
     bool countUp = false;
+    bool isNegative = false;
 
     for (size_t i = 0; i < strlen(ch); ++i) {
         if (ch[i] == '.') {
             countUp = true;
+        }
+        else if (i == 0 && ch[0] == '-') {
+            isNegative = true;
         }
         else {
             value = 10 * value + (ch[i] - 48);
@@ -27,14 +32,18 @@ Number* Calculator::charToNum(char* ch) {
         }
     }
 
-    Number* no = NULL;
-    no->setNumber(value, pointCnt);
+    if (isNegative == true) {
+        value *= -1;
+    }
+
+    Number no;
+    no.setNumber(value, pointCnt);
     return no;
 }
 
 //Number형을 char*로 반환 (출력용)
 char* Calculator:: numToChar(Number no) {
-    char ch[6]; //최댓값 1.234 (부호는 마지막에 고려해 출력)
+    char ch[100];
     int num = no.getValue();
     int chIter = 0;
     if (no.getPointCnt() == 0) {
@@ -42,9 +51,10 @@ char* Calculator:: numToChar(Number no) {
             int curInput = num / powerOfTen(i);
             num -= curInput * powerOfTen(i);
 
-            ch[chIter] = curInput;
+            ch[chIter] = intToChar(curInput);
             ++chIter;
         }
+        ch[chIter] = NULL;
     }
     else {
         int key = no.getPositionalNum() - no.getPointCnt();
@@ -55,7 +65,7 @@ char* Calculator:: numToChar(Number no) {
                 num -= curInput * powerOfTen(powerNum);
                 --powerNum;
 
-                ch[chIter] = curInput;
+                ch[chIter] = intToChar(curInput);
                 ++chIter;
             }
             ch[chIter] = '.';
@@ -65,9 +75,10 @@ char* Calculator:: numToChar(Number no) {
                 num -= curInput * powerOfTen(powerNum);
                 --powerNum;
 
-                ch[chIter] = curInput;
+                ch[chIter] = intToChar(curInput);
                 ++chIter;
             }
+            ch[chIter] = NULL;
         }
         else if (key == 0) {  //0.123  0.12  0.1
             ch[0] = '0';
@@ -78,9 +89,10 @@ char* Calculator:: numToChar(Number no) {
                 num -= curInput * powerOfTen(powerNum);
                 --powerNum;
 
-                ch[chIter] = curInput;
+                ch[chIter] = intToChar(curInput);
                 ++chIter;
             }
+            ch[chIter] = NULL;
         }
         else {  //0.012  0.001  0.01
             ch[0] = '0';
@@ -91,24 +103,42 @@ char* Calculator:: numToChar(Number no) {
                 ch[chIter] = '0';
                 ++chIter;
             }
-            for (int i = 0; i < no.getPointCnt(); ++i) {
+            for (int i = 0; i < no.getPositionalNum(); ++i) {
                 int curInput = num / powerOfTen(powerNum);
                 num -= curInput * powerOfTen(powerNum);
                 --powerNum;
 
-                ch[chIter] = curInput;
+                ch[chIter] = intToChar(curInput);
                 ++chIter;
             }
+            ch[chIter] = NULL;
         }
     }
 
     return ch;
 }
 
+//10 이하의 int형을 char로 리턴
+char intToChar(int no) {
+    switch (no) {
+    case 1: return '1';
+    case 2: return '2';
+    case 3: return '3';
+    case 4: return '4';
+    case 5: return '5';
+    case 6: return '6';
+    case 7: return '7';
+    case 8: return '8';
+    case 9: return '9';
+    case 0: return '0';
+    default: return '0';
+    }
+}
+
 //10의 몇 거듭제곱인지 반환
 int powerOfTen(int no) {
     int returnNo = 1;
-    for (int i = 0; i < no; ++i) {
+    for (int i = 1; i < no; ++i) {
         returnNo *= 10;
     }
     return returnNo;
