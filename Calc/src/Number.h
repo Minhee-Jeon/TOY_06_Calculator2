@@ -13,7 +13,7 @@ public:
 
 private:
     int value;
-    int pointCnt; //3을 초과할 수 없다
+    int pointCnt; 
 };
 
 //Number형 사칙연산 오버라이딩
