@@ -1,7 +1,9 @@
 #include <cxxtest/TestSuite.h>
 #include <iostream>
-#include "Number.h"
-#include "Calculator.h"
+#include <Number.h>
+
+#include <Calculator.h>
+
 
 class Test_Number: public CxxTest::TestSuite 
 {
@@ -71,5 +73,21 @@ public:
 		number.setNumber(1, 2);
 		ch = cal.numToChar(number);
 		TS_ASSERT(strcmp(ch, "0.01") == 0);
+	}
+
+	void test_isValidNum_Number() {
+		__isValidNum_Number();
+	}
+
+	void test_makeValidNum_Number() {
+		__makeValidNum_Number();
+	}
+
+	void test_isValidNum_char() {
+		__isValidNum_char();
+	}
+
+	void test_makeValidNum_char() {
+		__makeValidNum_char();
 	}
 };
