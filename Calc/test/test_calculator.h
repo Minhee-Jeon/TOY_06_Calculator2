@@ -5,7 +5,7 @@
 #include <Calculator.h>
 
 
-class Test_Number: public CxxTest::TestSuite 
+class Test_Calculator: public CxxTest::TestSuite 
 {
 public:
 	void test_charToNum() {
@@ -89,5 +89,56 @@ public:
 
 	void test_makeValidNum_char() {
 		__makeValidNum_char();
+	}
+
+	void test_calculate() {
+		Calculator cal;
+		Number answer;
+
+		answer = cal.calculate("1*2-34");
+		TS_ASSERT_EQUALS(answer.getValue(), 34);
+		TS_ASSERT_EQUALS(answer.getPointCnt(), 0);
+		cal.calculatorInit();
+		
+		answer = cal.calculate("1*2-34=");
+		TS_ASSERT_EQUALS(answer.getValue(), -32);
+		TS_ASSERT_EQUALS(answer.getPointCnt(), 0);
+		cal.calculatorInit();
+
+		answer = cal.calculate("1+2*.3=");
+		TS_ASSERT_EQUALS(answer.getValue(), 9);
+		TS_ASSERT_EQUALS(answer.getPointCnt(), 1);
+		cal.calculatorInit();
+
+		answer = cal.calculate("1+2*C.3=");
+		TS_ASSERT_EQUALS(answer.getValue(), 3);
+		TS_ASSERT_EQUALS(answer.getPointCnt(), 1);
+		cal.calculatorInit();
+
+		answer = cal.calculate("1+2*C.3=-0.8=");
+		TS_ASSERT_EQUALS(answer.getValue(), -5);
+		TS_ASSERT_EQUALS(answer.getPointCnt(), 1);
+		cal.calculatorInit();
+
+		answer = cal.calculate("1+2*C.3=-0.8");
+		TS_ASSERT_EQUALS(answer.getValue(), -8);
+		TS_ASSERT_EQUALS(answer.getPointCnt(), 1);
+		cal.calculatorInit();
+
+		answer = cal.calculate("1+2*.3==");
+		TS_ASSERT_EQUALS(answer.getValue(), 27);
+		TS_ASSERT_EQUALS(answer.getPointCnt(), 2);
+		cal.calculatorInit();
+
+		answer = cal.calculate("1+2*.3==.12345");
+		TS_ASSERT_EQUALS(answer.getValue(), 12345);
+		TS_ASSERT_EQUALS(answer.getPointCnt(), 5);
+		cal.calculatorInit();
+
+		answer = cal.calculate("0.02/3");
+		TS_ASSERT_EQUALS(answer.getValue(), 3);
+		TS_ASSERT_EQUALS(answer.getPointCnt(), 0);
+		cal.calculatorInit();
+
 	}
 };
