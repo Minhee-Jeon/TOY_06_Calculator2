@@ -11,22 +11,21 @@
 
 char* arrangeAnswer(char*);
 int charToInt(char);
+char* extractMinus(char*);
 char intToChar(int);
+bool isNegative(Number);
 bool isValidNum(Number);
 bool isValidNum(char*);
 Number operate(Number, char, Number);
 int powerOfTen(int);
-void printMinus(Number);
 Number makeValidNum(Number);
 char* makeValidNum(char*);
 
 //input 계산기
 Number Calculator::calculate(char* input) {
+
     Number answer;
-
     std::queue<char> q;
-
-    int tmpNo = 0;
     int isACompleted = FALSE;
     int isBCompleted = FALSE;
     bool hasDot = false;
@@ -50,6 +49,7 @@ Number Calculator::calculate(char* input) {
             }
             putA(q.front(), hasDot);
         }
+
         else if ((isNumber(q.front()) == true || q.front() == '.') && isACompleted == TRUE) {
             putB(q.front(), hasDot);
             isBCompleted = PROGRESSING;
@@ -62,7 +62,7 @@ Number Calculator::calculate(char* input) {
                 isBCompleted = FALSE;
             }
             op = q.front();
-            if (isACompleted == FALSE) isACompleted = TRUE;
+            isACompleted = TRUE;
             hasDot = false;
             isLastOpEqual = false;
 
@@ -218,9 +218,15 @@ void Calculator::printOutput(Number num) {
         output = makeValidNum(output);
     }
 
-    //printMinus(num);
+    if (isNegative(num) == true) {
+        std::cout << "-";
+        output = extractMinus(output);
+    }
 
-    std::cout << arrangeAnswer(output) << std::endl;
+    output = arrangeAnswer(output);
+    std::cout << output << std::endl;
+
+    delete(output);  //extractMinus() & arrangeAnswer()에서 동적할당한 output 해제
 }
 
 void Calculator::putA(char input, bool& hasDot) {
@@ -307,13 +313,36 @@ bool isValidNum(char* ch) {
     return ret;
 }
 
-//출력 시 네 자리 미만의 수라면 공백 추가하기 & 마지막 문자가 '.'일 시 삭제
+//출력 시 네 자리 미만의 수라면 공백 추가하기
 char* arrangeAnswer(char* ch) {
-    char* output = ch;
-    if (*ch == '-') {
-        
+    int numCnt = 0;
+    for (int i = 0; ch[i]; ++i) {
+        if (isNumber(ch[i])) {
+            ++numCnt;
+        }
+    }
+
+    int blankCnt = 4 - numCnt;
+    char* output = new char[strlen(ch) + blankCnt + 1];
+    for (int i = 0; i < blankCnt; ++i) {
+        output[i] = ' ';
+    }
+    for (int i = blankCnt; output[i]; ++i) {
+        output[i] = ch[i - blankCnt];
+        if (output[i + 1] == NULL) {
+            output[i] = '\0';
+        }
     }
     return output;
+}
+
+char* extractMinus(char* ch) {
+    char* positive = new char[strlen(ch) - 1];
+    for (size_t i = 0; i < strlen(ch)-1; ++i) {
+        positive[i] = ch[i + 1];
+    }
+    positive[strlen(ch) - 1] = NULL;
+    return positive;
 }
 
 //10 이하의 int형을 char로 리턴
@@ -410,6 +439,13 @@ char* makeValidNum(char* ch) {
 
 }
 
+bool isNegative(Number num) {
+    if (num.getValue() < 0) {
+        return true;
+    }
+    return false;
+}
+
 //유효범위 외의 수라면 네 자리에 맞춰주기
 Number makeValidNum(Number num) {
     //100000.234 -> 1000
@@ -457,13 +493,6 @@ int powerOfTen(int no) {
         returnNo *= 10;
     }
     return returnNo;
-}
-
-//Number의 value가 음수면 -출력
-void printMinus(Number num) {
-    if (num.getValue() < 0) {
-        std::cout << "-";
-    }
 }
 
 
@@ -557,4 +586,14 @@ void __makeValidNum_char() {
     assert(strcmp(makeValidNum("200.01"), "200") == 0);
     assert(strcmp(makeValidNum("0.10002"), "0.1") == 0);
     assert(strcmp(makeValidNum("1.2004"), "1.2") == 0);
+}
+
+void __extractMinus() {
+
+    assert(strcmp(extractMinus("-5.32"), "5.32") == 0);
+}
+
+void __arrangeAnswer() {
+    assert(strcmp(arrangeAnswer("1"), "   1") == 0);
+    assert(strcmp(arrangeAnswer("0.2"), "  0.2") == 0);
 }
