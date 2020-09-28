@@ -9,7 +9,6 @@
 #define TRUE 1
 #define PROGRESSING 2
 
-char* arrangeAnswer(char*);
 int charToInt(char);
 char* extractMinus(char*);
 char intToChar(int);
@@ -84,6 +83,7 @@ Number Calculator::calculate(char* input) {
 
             b.setNumber(0, 0);
             op = ' ';
+            
         }
 
         //input 마지막 글자가 숫자면 b 출력, 나머지(+,-,*,/,=,C)면 a 출력
@@ -100,6 +100,7 @@ Number Calculator::calculate(char* input) {
     return answer;
 }
 
+//Calculator 초기화
 void Calculator::calculatorInit() {
     a.setNumber(0, 0);
     b.setNumber(0, 0);
@@ -135,11 +136,19 @@ Number Calculator::charToNum(char* ch) {
 
 //Number형을 char*로 반환 (출력용)
 char* Calculator::numToChar(Number no) {
-    char ch[100];
+    char* ch = new char[100];
     int num = no.getValue();
     int chIter = 0;
+
+    if (num < 0) {
+        ch[chIter] = '-';
+        ++chIter;
+        num *= -1;
+    }
+
     if (no.getPointCnt() == 0) {
         for (int i = no.getPositionalNum(); i > 0; --i) {
+
             int curInput = num / powerOfTen(i);
             num -= curInput * powerOfTen(i);
 
@@ -151,7 +160,7 @@ char* Calculator::numToChar(Number no) {
     else {
         int key = no.getPositionalNum() - no.getPointCnt();
         int powerNum = no.getPositionalNum();
-        if (key > 0) { //1.234  12.34  123.4
+        if (key > 0) { //1.234  12.34  123.4 
             for (int i = 0; i < key; ++i) {
                 int curInput = num / powerOfTen(powerNum);
                 num -= curInput * powerOfTen(powerNum);
@@ -223,10 +232,9 @@ void Calculator::printOutput(Number num) {
         output = extractMinus(output);
     }
 
-    output = arrangeAnswer(output);
-    std::cout << output << std::endl;
+    printf("%5s\n", output);  //오른쪽 정렬
 
-    delete(output);  //extractMinus() & arrangeAnswer()에서 동적할당한 output 해제
+    delete[] output;  //numToChar() || makeValidNum() || extractMinus()에서 동적할당한 메모리 해제
 }
 
 void Calculator::putA(char input, bool& hasDot) {
@@ -313,35 +321,14 @@ bool isValidNum(char* ch) {
     return ret;
 }
 
-//출력 시 네 자리 미만의 수라면 공백 추가하기
-char* arrangeAnswer(char* ch) {
-    int numCnt = 0;
-    for (int i = 0; ch[i]; ++i) {
-        if (isNumber(ch[i])) {
-            ++numCnt;
-        }
-    }
-
-    int blankCnt = 4 - numCnt;
-    char* output = new char[strlen(ch) + blankCnt + 1];
-    for (int i = 0; i < blankCnt; ++i) {
-        output[i] = ' ';
-    }
-    for (int i = blankCnt; output[i]; ++i) {
-        output[i] = ch[i - blankCnt];
-        if (output[i + 1] == NULL) {
-            output[i] = '\0';
-        }
-    }
-    return output;
-}
-
+//"-0.123" -> "0.123"
 char* extractMinus(char* ch) {
-    char* positive = new char[strlen(ch) - 1];
-    for (size_t i = 0; i < strlen(ch)-1; ++i) {
+    char* positive = new char[strlen(ch)];
+    for (size_t i = 0; ch[i + 1]; ++i) {
         positive[i] = ch[i + 1];
     }
     positive[strlen(ch) - 1] = NULL;
+    delete[] ch;
     return positive;
 }
 
@@ -391,34 +378,49 @@ char* makeValidNum(char* ch) {
     //12345.234 -> E
     //1234.56 -> 1234
     //12.3456 -> 12.34
-    char input[100] = { 0, };
-    for (int i = 0; ch[i]; ++i) {
-        input[i] = ch[i];
-    }
+    //ch를 input에 담아놓고 input에서 4글자가 채워지면 return하는 방식이었음.
+    //ch에서 한글자씩 input으로 담고 input 마지막에 NULL넣고 return하는 방식으로 변경
+    char* input = new char[8];
+    memset(input, NULL, sizeof(input));
 
     int charNumCnt = 0;
     int zeroCnt = 0; //underflow의 경우 0이 4개 이상이면 0으로 변환
     bool haveDot = false;
     int i;
-
-    for (i = 0; input[i]; ++i) {
-        if (isNumber(input[i])) {
+    
+    for (i = 0; ch[i]; ++i) {
+        if (isNumber(ch[i])) {
             charNumCnt += 1;
+            input[i] = ch[i];
             if (input[i] == '0') zeroCnt += 1;
         }
-        else if (input[i] == '.') {
+        else if (ch[i] == '.') {
+            if (haveDot == false) {
+                input[i] = ch[i];
+            }
             haveDot = true;
+        }
+        else if (ch[i] == '-') {
+            input[i] = ch[i];
         }
 
         //overflow
         if (charNumCnt >= 5 && haveDot == false) {
-            return "E";
+            delete[] ch;
+            delete[] input;
+            char* e = new char[2];  //동적할당하지 않고 리턴 가능하나 출력 시 통일성을 위해 E나 0도 동적할당
+            strcpy(e, "E");
+            return e;
         }
         //underflow
-        else if (charNumCnt == 4 && zeroCnt == 4) {
-            return "0";
+        if (charNumCnt == 4 && zeroCnt == 4) {
+            delete[] ch;
+            delete[] input;
+            char* zero = new char[2];
+            strcpy(zero, "0");
+            return zero;
         }
-        else if (charNumCnt == 4 && haveDot == true) { //0.123 12.34 123.4 1234. 
+        if (charNumCnt == 4 && haveDot == true) { //0.123 12.34 123.4 1234. 
             input[i + 1] = NULL; //버림. ch[i]였으나 segmentation fault로 스택인 char[] input에 담아 고쳐 리턴
 
             //20.00 -> 20.
@@ -429,13 +431,15 @@ char* makeValidNum(char* ch) {
                 }
             }
 
-            //1234.이면 1234로 리턴
+            //1234.-> 1234
             if (input[i] == '.') {
                 input[i] = NULL;
             }
+            delete[] ch;
+            return input;
         }
     }
-    return input;
+    
 
 }
 
@@ -573,27 +577,78 @@ void __isValidNum_char() {
 }
 
 void __makeValidNum_char() {
-    assert(strcmp(makeValidNum("0.1234"), "0.123") == 0);
-    assert(strcmp(makeValidNum("12.345678"), "12.34") == 0);
-    assert(strcmp(makeValidNum("-123.45678"), "-123.4") == 0);
-    assert(strcmp(makeValidNum("1234.1234"), "1234") == 0);
+    char* case1_1 = new char[7];
+    strcpy(case1_1, "0.1234");
+    char* case1_1_ = makeValidNum(case1_1);
+    assert(strcmp(case1_1_, "0.123") == 0);
+    delete[] case1_1_;
 
-    assert(strcmp(makeValidNum("123456"), "E") == 0);
-    assert(strcmp(makeValidNum("123456.789"), "E") == 0);
+    char* case1_2 = new char[10];
+    strcpy(case1_2, "12.345678");
+    char* case1_2_ = makeValidNum(case1_2);
+    assert(strcmp(case1_2_, "12.34") == 0);
+    delete[] case1_2_;
 
-    assert(strcmp(makeValidNum("0.00099"), "0") == 0);
+    char* case1_3 = new char[11];
+    strcpy(case1_3, "-123.45678");
+    char* case1_3_ = makeValidNum(case1_3);
+    assert(strcmp(case1_3_, "-123.4") == 0);
+    delete[] case1_3_;
 
-    assert(strcmp(makeValidNum("200.01"), "200") == 0);
-    assert(strcmp(makeValidNum("0.10002"), "0.1") == 0);
-    assert(strcmp(makeValidNum("1.2004"), "1.2") == 0);
+    char* case1_4 = new char[10];
+    strcpy(case1_4, "1234.1234");
+    char* case1_4_ = makeValidNum(case1_4);
+    assert(strcmp(case1_4_, "1234") == 0);
+    delete[] case1_4_;
+
+    char* case2_1 = new char[7];
+    strcpy(case2_1, "123456");
+    char* case2_1_ = makeValidNum(case2_1);
+    assert(strcmp(case2_1_, "E") == 0);
+    delete[] case2_1_;
+
+    char* case2_2 = new char[11];
+    strcpy(case2_2, "123456.789");
+    char* case2_2_ = makeValidNum(case2_2);
+    assert(strcmp(case2_2_, "E") == 0);
+    delete[] case2_2_;
+
+    char* case2_3 = new char[8];
+    strcpy(case2_3, "0.00099");
+    char* case2_3_ = makeValidNum(case2_3);
+    assert(strcmp(case2_3_, "0") == 0);
+    delete[] case2_3_;
+
+    char* case3_1 = new char[7];
+    strcpy(case3_1, "200.01");
+    char* case3_1_ = makeValidNum(case3_1);
+    assert(strcmp(case3_1_, "200") == 0);
+    delete[] case3_1_;
+
+    char* case3_2 = new char[8];
+    strcpy(case3_2, "0.10002");
+    char* case3_2_ = makeValidNum(case3_2);
+    assert(strcmp(case3_2_, "0.1") == 0);
+    delete[] case3_2_;
+
+    char* case3_3 = new char[7];
+    strcpy(case3_3, "1.2004");
+    char* case3_3_ = makeValidNum(case3_3);
+    assert(strcmp(case3_3_, "1.2") == 0);
+    delete[] case3_3_;
 }
 
 void __extractMinus() {
 
-    assert(strcmp(extractMinus("-5.32"), "5.32") == 0);
-}
+    char* case1 = new char[6];
+    strcpy(case1, "-5.32");
+    char* case1_ = extractMinus(case1);
+    assert(strcmp(case1_, "5.32") == 0);
+    delete[] case1_;
 
-void __arrangeAnswer() {
-    assert(strcmp(arrangeAnswer("1"), "   1") == 0);
-    assert(strcmp(arrangeAnswer("0.2"), "  0.2") == 0);
+    char* case2 = new char[7];
+    strcpy(case2, "-123.4");
+    char* case2_ = extractMinus(case2);
+    assert(strcmp(case2_, "123.4") == 0);
+    delete[] case2_;
 }

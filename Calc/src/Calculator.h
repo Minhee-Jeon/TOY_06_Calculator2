@@ -30,4 +30,3 @@ void __makeValidNum_Number();
 void __isValidNum_char();
 void __makeValidNum_char();
 void __extractMinus();
-void __arrangeAnswer();
