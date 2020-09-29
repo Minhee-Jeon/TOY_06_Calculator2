@@ -57,7 +57,7 @@ Number Calculator::calculate(char* input) {
             if (isBCompleted == PROGRESSING) {
                 Number c = operate(a, op, b);
                 a.setNumber(c.getValue(), c.getPointCnt(), c.getNaN());
-                b.setNumber(0, 0, false);
+                b.setNumber(0, 0, c.getNaN());
                 isBCompleted = FALSE;
             }
             op = q.front();
@@ -92,6 +92,13 @@ Number Calculator::calculate(char* input) {
 
             //마지막 글자가 숫자여도 마지막 연산자(?)가 '='였으면 a 출력
             answer = isLastOpEqual == true ? a : answer;
+
+            if (answer == a && isLastOpEqual == false) {
+                b.setNumber(0, 0, false);
+            }
+            else if (answer == b) {
+                a.setNumber(0, 0, false);
+            }
         }
 
         prevInput = q.front();
@@ -147,6 +154,10 @@ char* Calculator::numToChar(Number no) {
     }
 
     if (no.getPointCnt() == 0) {
+        if (num == 0) {
+            ch[chIter] = '0';
+            ++chIter;
+        }
         for (int i = no.getPositionalNum(); i > 0; --i) {
 
             int curInput = num / powerOfTen(i);

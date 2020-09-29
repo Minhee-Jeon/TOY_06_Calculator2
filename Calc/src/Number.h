@@ -25,6 +25,8 @@ Number operator-(Number&, Number&);
 Number operator*(Number&, Number&);
 Number operator/(Number&, Number&);
 
+bool operator==(Number&, Number&);
+
 
 
 #endif
