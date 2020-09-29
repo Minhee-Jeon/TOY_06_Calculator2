@@ -44,7 +44,7 @@ Number Calculator::calculate(char* input) {
         q.push(input[i]);
         if ((isNumber(q.front()) == true || q.front() == '.')&& isACompleted == FALSE) {
             if (prevInput == '=') {
-                a.setNumber(0, 0);
+                a.setNumber(0, 0, a.getNaN()); 
             }
             putA(q.front(), hasDot);
         }
@@ -56,8 +56,8 @@ Number Calculator::calculate(char* input) {
         else if (isOperator(q.front()) == true) {
             if (isBCompleted == PROGRESSING) {
                 Number c = operate(a, op, b);
-                a.setNumber(c.getValue(), c.getPointCnt());
-                b.setNumber(0, 0);
+                a.setNumber(c.getValue(), c.getPointCnt(), c.getNaN());
+                b.setNumber(0, 0, false);
                 isBCompleted = FALSE;
             }
             op = q.front();
@@ -69,19 +69,19 @@ Number Calculator::calculate(char* input) {
         else if (q.front() == '=') {
             if (op != ' ') {
                 Number c = operate(a, op, b);
-                a.setNumber(c.getValue(), c.getPointCnt());
+                a.setNumber(c.getValue(), c.getPointCnt(), c.getNaN());
             }
             isACompleted = FALSE;
             hasDot = false;
             isLastOpEqual = true;
         }
         else if (q.front() == 'C') {
-            a.setNumber(0, 0);
+            a.setNumber(0, 0, false);
             isACompleted = FALSE;
             hasDot = false;
             isLastOpEqual = false;
 
-            b.setNumber(0, 0);
+            b.setNumber(0, 0, false);
             op = ' ';
             
         }
@@ -221,6 +221,12 @@ char* Calculator::numToChar(Number no) {
 
 //input의 계산 결과물을 계산기 형식에 맞춰 출력
 void Calculator::printOutput(Number num) {
+    //num의 NaN이 true라면 "E" 출력 & 리턴
+    if (a.getNaN() == true || b.getNaN() == true) {
+        printf("%5s\n", "E");
+        return;
+    }
+
     char* output = numToChar(num);
 
     if (isValidNum(output) == false) {
@@ -243,8 +249,8 @@ void Calculator::putA(char input, bool& hasDot) {
     }
     else {
         hasDot == true ?
-            a.setNumber(a.getValue() * 10 + charToInt(input), a.getPointCnt() + 1) :
-            a.setNumber(a.getValue() * 10 + charToInt(input), 0);
+            a.setNumber(a.getValue() * 10 + charToInt(input), a.getPointCnt() + 1, a.getNaN()) :
+            a.setNumber(a.getValue() * 10 + charToInt(input), 0, a.getNaN());
     }
 
     if (isValidNum(a) == false) {
@@ -258,8 +264,8 @@ void Calculator::putB(char input, bool& hasDot) {
     }
     else {
         hasDot == true ?
-            b.setNumber(b.getValue() * 10 + charToInt(input), b.getPointCnt() + 1) :
-            b.setNumber(b.getValue() * 10 + charToInt(input), 0);
+            b.setNumber(b.getValue() * 10 + charToInt(input), b.getPointCnt() + 1, b.getNaN()) :
+            b.setNumber(b.getValue() * 10 + charToInt(input), 0, b.getNaN());
     }
 
     if (isValidNum(b) == false) {

@@ -8,6 +8,12 @@ void Number::setNumber(int val, int cnt) {
     this->pointCnt = cnt;
 }
 
+void Number::setNumber(int val, int cnt, bool NaN) {
+    this->value = val;
+    this->pointCnt = cnt;
+    this->NaN = NaN; 
+}
+
 int Number::getValue() {
     return this->value;
 }
@@ -28,13 +34,19 @@ int Number::getPositionalNum() {
     return cnt;
 }
 
+bool Number::getNaN() {
+    return this->NaN;
+}
+
 void adjustAB(Number&, Number&);
 Number operator+(Number& no1, Number& no2) {
     if (no1.getPointCnt() != no2.getPointCnt()) {
         adjustAB(no1, no2);
     }
     Number no3;
-    no3.setNumber(no1.getValue() + no2.getValue(), no1.getPointCnt());
+    no3.setNumber(no1.getValue() + no2.getValue(), 
+                  no1.getPointCnt(), 
+                  no1.getNaN() || no2.getNaN());
     return no3;
 }
 
@@ -44,18 +56,29 @@ Number operator-(Number& no1, Number& no2) {
     }
 
     Number no3;
-    no3.setNumber(no1.getValue() - no2.getValue(), no1.getPointCnt());
+    no3.setNumber(no1.getValue() - no2.getValue(), 
+                  no1.getPointCnt(),
+                  no1.getNaN() || no2.getNaN());
     return no3;
 }
 
 Number operator*(Number& no1, Number& no2) {
     Number no3;
-    no3.setNumber(no1.getValue() * no2.getValue(), no1.getPointCnt() + no2.getPointCnt());
+    no3.setNumber(no1.getValue() * no2.getValue(), 
+                  no1.getPointCnt() + no2.getPointCnt(),
+                  no1.getNaN() || no2.getNaN());
     return no3;
 }
 
 Number operator/(Number& no1, Number& no2) {
     Number no3;
+
+    //나누는 수가 0일 때 NaN 멤버가 true인 Number를 조기리턴
+    if (no2.getValue() == 0) {
+        no3.setNumber(0, 0, true);
+        return no3;
+    }
+
     double divResult = (double)no1.getValue() / (double)no2.getValue();
     divResult = (round(divResult * 1000)) / 1000.0; //소수점 셋째자리까지만 저장
     int toInt = divResult;
@@ -63,6 +86,7 @@ Number operator/(Number& no1, Number& no2) {
     int additionalPointCnt = 0;
     no3.setNumber(no1.getValue() / no2.getValue(), no1.getPointCnt() - no2.getPointCnt());
 
+    //정수로 나누어떨어지지 않을 시
     if (divResult != toInt) {
         while (divResult - (divResult - toInt) != divResult) {
             divResult *= 10;
