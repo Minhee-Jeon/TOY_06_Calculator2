@@ -60,6 +60,9 @@ Number Calculator::calculate(char* input) {
                 b.setNumber(0, 0, c.getNaN());
                 isBCompleted = FALSE;
             }
+            if (i == 0 && b.getValue() != 0) {
+                b.setNumber(0, 0, false);
+            }
             op = q.front();
             isACompleted = TRUE;
             hasDot = false;
@@ -298,12 +301,15 @@ int charToInt(char ch) {
     case '8': return 8;
     case '9': return 9;
     case '0': return 0;
-    defalut: return 0;
+    default: return 0;
     }
 }
 
 //입력과정에서 16개의 정해진 문자만 입력되었는지 확인
 bool isValidInput(char* input) {
+    if (strcmp(input, "end") == 0) {
+        return false;
+    }
     for (size_t i = 0; i < strlen(input); ++i) {
         if (!isNumber(input[i]) && !isOperator(input[i]) && !isEqual(input[i]) && input[i] != 'C' && input[i] != '.') {
             std::cout << "유효하지 않은 입력입니다." << std::endl;
