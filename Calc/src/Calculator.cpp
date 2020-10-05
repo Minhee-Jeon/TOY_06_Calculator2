@@ -57,8 +57,11 @@ Number Calculator::calculate(char* input) {
             if (isBCompleted == PROGRESSING) {
                 Number c = operate(a, op, b);
                 a.setNumber(c.getValue(), c.getPointCnt(), c.getNaN());
-                b.setNumber(0, 0, false);
+                b.setNumber(0, 0, c.getNaN());
                 isBCompleted = FALSE;
+            }
+            if (i == 0 && b.getValue() != 0) {
+                b.setNumber(0, 0, false);
             }
             op = q.front();
             isACompleted = TRUE;
@@ -92,6 +95,13 @@ Number Calculator::calculate(char* input) {
 
             //마지막 글자가 숫자여도 마지막 연산자(?)가 '='였으면 a 출력
             answer = isLastOpEqual == true ? a : answer;
+
+            if (answer == a && isLastOpEqual == false) {
+                b.setNumber(0, 0, false);
+            }
+            else if (answer == b) {
+                a.setNumber(0, 0, false);
+            }
         }
 
         prevInput = q.front();
@@ -147,6 +157,10 @@ char* Calculator::numToChar(Number no) {
     }
 
     if (no.getPointCnt() == 0) {
+        if (num == 0) {
+            ch[chIter] = '0';
+            ++chIter;
+        }
         for (int i = no.getPositionalNum(); i > 0; --i) {
 
             int curInput = num / powerOfTen(i);
@@ -287,12 +301,15 @@ int charToInt(char ch) {
     case '8': return 8;
     case '9': return 9;
     case '0': return 0;
-    defalut: return 0;
+    default: return 0;
     }
 }
 
 //입력과정에서 16개의 정해진 문자만 입력되었는지 확인
 bool isValidInput(char* input) {
+    if (strcmp(input, "end") == 0) {
+        return false;
+    }
     for (size_t i = 0; i < strlen(input); ++i) {
         if (!isNumber(input[i]) && !isOperator(input[i]) && !isEqual(input[i]) && input[i] != 'C' && input[i] != '.') {
             std::cout << "유효하지 않은 입력입니다." << std::endl;
@@ -445,7 +462,7 @@ char* makeValidNum(char* ch) {
             return input;
         }
     }
-    
+    return input;
 
 }
 

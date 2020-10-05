@@ -119,3 +119,11 @@ void adjustAB(Number& no1, Number& no2) {
         }
     }
 }
+
+bool operator==(Number& no1, Number& no2) {
+    bool isValueSame = no1.getValue() == no2.getValue();
+    bool isPointCntSame = no1.getPointCnt() == no2.getPointCnt();
+    bool isNaNSame = no1.getNaN() == no2.getNaN();
+
+    return isValueSame && isPointCntSame && isNaNSame;
+}

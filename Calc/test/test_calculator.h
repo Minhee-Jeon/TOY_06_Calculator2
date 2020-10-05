@@ -33,7 +33,7 @@ public:
 		number.setNumber(1234, 0);
 		ch = cal.numToChar(number);
 		TS_ASSERT(strcmp(ch, "1234") == 0);
-		delete(ch);
+		delete[] ch;
 
 		//else
 		//(key > 0)
@@ -41,57 +41,57 @@ public:
 		number.setNumber(1234, 3);
 		ch = cal.numToChar(number);
 		TS_ASSERT(strcmp(ch, "1.234") == 0);
-		delete(ch);
+		delete[] ch;
 
 		ch = NULL;
 		number.setNumber(1234, 2);
 		ch = cal.numToChar(number);
 		TS_ASSERT(strcmp(ch, "12.34") == 0);
-		delete(ch);
+		delete[] ch;
 
 		ch = NULL;
 		number.setNumber(1234, 1);
 		ch = cal.numToChar(number);
 		TS_ASSERT(strcmp(ch, "123.4") == 0);
-		delete(ch);
+		delete[] ch;
 
 		//(key == 0)
 		ch = NULL;
 		number.setNumber(123, 3);
 		ch = cal.numToChar(number);
 		TS_ASSERT(strcmp(ch, "0.123") == 0);
-		delete(ch);
+		delete[] ch;
 
 		ch = NULL;
 		number.setNumber(12, 2);
 		ch = cal.numToChar(number);
 		TS_ASSERT(strcmp(ch, "0.12") == 0);
-		delete(ch);
+		delete[] ch;
 
 		ch = NULL;
 		number.setNumber(1, 1);
 		ch = cal.numToChar(number);
 		TS_ASSERT(strcmp(ch, "0.1") == 0);
-		delete(ch);
+		delete[] ch;
 
 		//(key < 0)
 		ch = NULL;
 		number.setNumber(12, 3);
 		ch = cal.numToChar(number);
 		TS_ASSERT(strcmp(ch, "0.012") == 0);
-		delete(ch);
+		delete[] ch;
 
 		ch = NULL;
 		number.setNumber(1, 3);
 		ch = cal.numToChar(number);
 		TS_ASSERT(strcmp(ch, "0.001") == 0);
-		delete(ch);
+		delete[] ch;
 
 		ch = NULL;
 		number.setNumber(1, 2);
 		ch = cal.numToChar(number);
 		TS_ASSERT(strcmp(ch, "0.01") == 0); 
-		delete(ch);
+		delete[] ch;
 	}
 
 	void test_isValidNum_Number() {
