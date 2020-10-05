@@ -462,7 +462,7 @@ char* makeValidNum(char* ch) {
             return input;
         }
     }
-    
+    return input;
 
 }
 
